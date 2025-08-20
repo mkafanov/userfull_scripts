@@ -45,3 +45,67 @@ query = """
 """
 
 sql_result = sqldf(query, globals())
+
+
+#Загрузка данных в БД из большого файла
+
+import pandas as pd
+import sqlalchemy as sa
+
+DB = dict(
+    user="",
+    password="",
+    host="",
+    port=5432,
+    dbname="",
+)
+engine = sa.create_engine(
+    f"postgresql+psycopg2://{DB['user']}:{DB['password']}@{DB['host']}:{DB['port']}/{DB['dbname']}",
+)
+
+#  параметры CSV
+csv_path   = "big_file.csv"
+chunk_rows = 100_000 # будем грузить по 100K строк
+table_name = "example_csv"
+schema     = "raw"
+
+# создаём таблицу один раз с нужными колонками
+with engine.begin() as conn:
+    conn.exec_driver_sql(f"""
+        CREATE SCHEMA IF NOT EXISTS {schema};
+        DROP TABLE IF EXISTS {schema}.{table_name};
+        CREATE TABLE {schema}.{table_name} (
+            col_0 text, col_1 text, col_2 text, col_3 text, col_4 text,
+            col_5 text, col_6 text, col_7 text, col_8 text, col_9 text
+        );
+    """)
+
+# грузим чанками
+reader = pd.read_csv(
+    csv_path,
+    chunksize=chunk_rows,
+    iterator=True,
+    header=0,
+)
+
+for i, chunk in enumerate(reader, 1):
+    chunk.to_sql(
+        name=table_name,
+        con=engine,
+        schema=schema,
+        if_exists="append",
+        index=False,
+        method="multi",
+    )
+    print(f"Чанк {i}: {len(chunk)} строк залито")
+
+#Поиск по регулярным выражениям в pandas DF
+pattern = r'\b(?:ИИ|искусственный интеллект|AI|Artificial intelligence|нейросет|машинное обучение)\b' 
+
+df_final = df[
+    df['title'].str.contains(pattern, case=False, regex=True, na=False) |
+    df['domain'].str.contains(pattern, case=False, regex=True, na=False)
+]
+
+
+

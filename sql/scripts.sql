@@ -36,3 +36,49 @@ USING (
 ON target.order_no = source.order_no AND target.updated_at = source.max_ts
 WHEN NOT MATCHED BY SOURCE THEN
     DELETE
+
+
+#Загрузка данных из файла
+
+COPY raw.sales
+FROM '/var/lib/postgresql/big_sales.csv'   -- путь до файла на сервере или локальный путь(если постгре локальная).
+WITH (
+    FORMAT      csv,       -- CSV-парсер
+    HEADER      true,      -- пропускаем строку заголовков
+    DELIMITER   ',',       -- если вдруг не запятая
+    QUOTE       '"',       -- кавычки по умолчанию
+    ENCODING    'UTF8'     -- кодировка можно изменить если будет "криво"
+);
+
+#выдача только последнего заказа
+select distinct on (order_id) * 
+from orders 
+order by order, created_at desc 
+
+
+#Выдача кол-во артикулов с гаммой А, B
+select count(*) filter (where gamma = 'A') as count_A
+, count(*) filter (where gamma = 'B') as count_B
+from bdd_rms
+
+
+#Генерация дат по таблице
+SELECT generate_series(
+        (SELECT MIN(sale_date) FROM Sales)::date,
+        (SELECT MAX(sale_date) FROM Sales)::date,
+        '1 day'
+    ) AS dt
+
+
+# Добавление строк без дубликатов
+INSERT INTO Currencies (code, name, updated_at)
+VALUES
+    ('USD', 'US Dollar',      NOW()),
+    ('JPY', 'Japanese Yen',   NOW()),
+    ('EUR', 'Euro (fixed)',   NOW())
+ON CONFLICT (code) DO UPDATE
+    SET name       = EXCLUDED.name,
+        updated_at = EXCLUDED.updated_at;
+
+
+
