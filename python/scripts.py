@@ -109,3 +109,17 @@ df_final = df[
 
 
 
+#Генерация безопасного пароля
+import secrets
+import string
+
+alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+password = ''.join(secrets.choice(alphabet) for i in range(16))
+print(password)
+
+#Алерты в телеграм бот
+python  
+requests.post(f"https://api.telegram.org/botTOKEN/sendMessage",  
+              json={"chat_id": "ID", "text": "🚨 CPU > 90%!"})  
+
+

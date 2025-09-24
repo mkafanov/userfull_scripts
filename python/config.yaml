@@ -1,0 +1,18 @@
+database:
+  host: "localhost"
+  port: 5432
+  name: "my_app"
+  user: "admin"
+
+logging:
+  level: "INFO"
+  file: "/var/log/my_app.log"
+
+api:
+  endpoint: "https://api.example.com/v1"
+  timeout_seconds: 30
+  retry_attempts: 3
+
+features:
+  enable_telemetry: false
+  cache_size: 1000
