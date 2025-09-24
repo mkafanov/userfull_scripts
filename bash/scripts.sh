@@ -30,3 +30,19 @@ ssh-keygen -R 192.168.1.107
 #Удаление лог.файлов старше 30 дней
 LOG_DIR="/var/log"  
 find "$LOG_DIR" -type f -name "*.log" -mtime +30 -delete  
+
+#Проверка какой процесс использует определенный порт (3 варианта)
+sudo lsof -i :8080
+sudo netstat -tulnp | grep :8080
+sudo ss -lptn 'sport = :8080'
+
+#Проверка обработки использования скриптом/приложением системных вызовов
+strace -c python3 app.py
+
+#Проверка загрузки CPU 
+top -bn1 | grep "Cpu(s)" | awk '{print "CPU: " 100 - $8 "%"}'
+
+#Правильный запуск скрипта python3 по крону
+* * * * * /usr/bin/python3 /path/to/script.py 
+#узнать где лежит python
+whereis python3
