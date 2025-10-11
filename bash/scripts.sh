@@ -46,3 +46,18 @@ top -bn1 | grep "Cpu(s)" | awk '{print "CPU: " 100 - $8 "%"}'
 * * * * * /usr/bin/python3 /path/to/script.py 
 #узнать где лежит python
 whereis python3
+
+#Состояние батареи
+upower -i $(upower -e | grep battery_bms) | awk '\s) | awk '\
+        /energy-full:/ {ef=$2}\
+        /energy-full-design:/ {efd=$2}\
+        END {print ef/efd}
+
+#Скорость сети
+speedtest-cli
+
+#Shebang в исполняемом файле сразу указываем путь к python 
+#!/usr/bin/env python3
+#!/bin/bash - или bash
+
+

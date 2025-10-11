@@ -1,0 +1,20 @@
+#Отказустойчивое обращение к api.
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import requests
+
+@retry(
+    stop=stop_after_attempt(5),  # Остановиться после 5 попыток
+    wait=wait_exponential(multiplier=1, min=2, max=30),  # Экспоненциальная задержка: 2s, 4s, 8s... макс. 30s
+    retry=retry_if_exception_type(requests.exceptions.RequestException)  # Повторять только при ошибках сети
+)
+def call_unreliable_api(url):
+    response = requests.get(url, timeout=3)
+    response.raise_for_status()  # Выбросит исключение при HTTP-ошибке
+    return response.json()
+
+# Использование
+try:
+    data = call_unreliable_api("https://api.example.com/shaky-endpoint")
+    print("Успех!", data)
+except Exception as e:
+    print(f"Не удалось после всех попыток: {e}")

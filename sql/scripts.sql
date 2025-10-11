@@ -81,4 +81,13 @@ ON CONFLICT (code) DO UPDATE
         updated_at = EXCLUDED.updated_at;
 
 
+#Генерация значий
+SELECT * 
+FROM generate_series(1, 10) AS number;
+
+#Генерация дат
+SELECT * 
+FROM generate_series('2025-01-01'::date, '2025-01-07'::date, '1 day') AS day;
+
+
 
