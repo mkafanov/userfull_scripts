@@ -61,3 +61,7 @@ speedtest-cli
 #!/bin/bash - или bash
 
 
+#последняя команда через sudo
+apt-get update
+sudo !!
+
